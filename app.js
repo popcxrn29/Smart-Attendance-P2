@@ -1,56 +1,124 @@
-// นำเข้าไฟล์ Excel
-
-function importExcel(){
-
-    const fileInput = document.getElementById("excelFile");
-
-    const file = fileInput.files[0];
+import { db } from "./firebase.js";
 
 
-    if(!file){
+import {
+collection,
+addDoc
+}
 
-        alert("กรุณาเลือกไฟล์ Excel ก่อน");
-
-        return;
-
-    }
-
-
-    const reader = new FileReader();
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-    reader.onload = function(e){
+
+window.importExcel = function(){
 
 
-        const data = new Uint8Array(e.target.result);
+const file = document.getElementById("excelFile").files[0];
 
 
-        const workbook = XLSX.read(data, {
-            type:"array"
-        });
+
+if(!file){
+
+alert("กรุณาเลือกไฟล์ Excel");
+
+return;
+
+}
 
 
-        const sheet = workbook.Sheets[
-            workbook.SheetNames[0]
-        ];
+
+const reader = new FileReader();
 
 
-        const students = XLSX.utils.sheet_to_json(sheet);
+
+reader.onload = async function(e){
 
 
-        console.log(students);
+
+const data = new Uint8Array(e.target.result);
 
 
-        alert(
-        "อ่านข้อมูลนักเรียนได้ " 
-        + students.length 
-        + " คน"
-        );
+
+const workbook = XLSX.read(data, {
+
+type:"array"
+
+});
 
 
-    };
+
+const sheet = workbook.Sheets[
+
+workbook.SheetNames[0]
+
+];
 
 
-    reader.readAsArrayBuffer(file);
+
+const students = XLSX.utils.sheet_to_json(sheet);
+
+
+
+console.log(students);
+
+
+
+for(let student of students){
+
+
+
+await addDoc(
+
+collection(db,"students"),
+
+{
+
+
+studentId:String(student.studentId),
+
+
+name:student.name,
+
+
+nickname:student.nickname,
+
+
+class:student.class
+
+
+}
+
+);
+
+
+}
+
+
+
+document.getElementById("total").innerHTML =
+
+students.length + " คน";
+
+
+
+alert(
+
+"นำเข้านักเรียนสำเร็จ "
+
++ students.length
+
++ " คน"
+
+);
+
+
+
+};
+
+
+
+reader.readAsArrayBuffer(file);
+
+
 
 }
