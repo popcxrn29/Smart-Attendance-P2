@@ -1,36 +1,56 @@
-// Smart Attendance System
+// นำเข้าไฟล์ Excel
 
-// ปุ่มสแกน QR
-const scanButton = document.querySelector(".scan");
+function importExcel(){
 
-scanButton.addEventListener("click", function(){
+    const fileInput = document.getElementById("excelFile");
 
-    alert("📷 ระบบสแกน QR Code กำลังเปิดใช้งาน");
-
-});
+    const file = fileInput.files[0];
 
 
-// ปุ่มค้นหา
-const searchButton = document.querySelector(".search");
+    if(!file){
 
+        alert("กรุณาเลือกไฟล์ Excel ก่อน");
 
-searchButton.addEventListener("click", function(){
-
-    let name = document.querySelector("input").value;
-
-
-    if(name === ""){
-
-        alert("กรุณาพิมพ์ชื่อ หรือชื่อเล่น");
+        return;
 
     }
 
-    else{
+
+    const reader = new FileReader();
+
+
+    reader.onload = function(e){
+
+
+        const data = new Uint8Array(e.target.result);
+
+
+        const workbook = XLSX.read(data, {
+            type:"array"
+        });
+
+
+        const sheet = workbook.Sheets[
+            workbook.SheetNames[0]
+        ];
+
+
+        const students = XLSX.utils.sheet_to_json(sheet);
+
+
+        console.log(students);
+
 
         alert(
-        "🔍 กำลังค้นหา : " + name
+        "อ่านข้อมูลนักเรียนได้ " 
+        + students.length 
+        + " คน"
         );
 
-    }
 
-});
+    };
+
+
+    reader.readAsArrayBuffer(file);
+
+}
